@@ -1,0 +1,27 @@
+// Place all the styles related to the Gamepage controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+
+//@import url("lessdefaults.css");
+
+.defpos {
+	position: relative;
+	float: left;
+	margin: 0;
+	padding: 0;
+}
+
+
+#gamepage {
+  .defpos;
+  //width: 9999px;
+  //height: 1000px;
+  border-left: 2px solid rgb(0,0,0);
+  z-index: -1;
+  
+  #map-canvas {
+    .defpos;
+    height: 100%;
+  }
+}

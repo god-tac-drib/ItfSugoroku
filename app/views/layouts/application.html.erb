@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ItfSugoroku</title>
+    <%= stylesheet_link_tag    "application", :media => "all" %>
+    <%= javascript_include_tag "application" %>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <%= csrf_meta_tags %>
+  </head>
+  <body>
+    <header>
+      <h1><a href="/">Itf Sugoroku</a></h1>
+      <% if flash[:alert] %>
+        <p id="notice"><%= flash[:alert] %></p>
+      <% end %>
+    </header>
+    
+    <nav id="nav">
+      <h2>Menu</h2>
+      <ul id="nav_menu">
+        <li><%= link_to 'login', login_url, :class => "mordal" %></li>
+        <li><%= link_to 'logout', logout_path, method: :delete, data: { confirm: 'Are you sure?' } %></li>
+        <li><%= link_to 'users', users_url, :class => "mordal" %></li>
+      </ul>
+      
+      <h2>User status</h2>
+      <div id="user">
+        <% if session[:user_id] %>
+          <%= render @user_status %><!-- #_user.html.erbをロード。@userはgamepage_contrillerで作成 -->
+        <% else %>
+          please log in.
+        <% end %>
+      </div>
+      
+    </nav>
+    
+    <%= yield %>
+    
+    <footer>
+    </footer>
+  
+  </body>
+</html>
