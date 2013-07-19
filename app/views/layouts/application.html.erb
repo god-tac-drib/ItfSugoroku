@@ -3,8 +3,10 @@
   <head>
     <title>ItfSugoroku</title>
     <%= stylesheet_link_tag    "application", :media => "all" %>
+    <script src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+    <!-- <script src="http://geohex.net/hex_v2.03_core.js" type="text/javascript" content="text/html; charset=utf-8"></script> --> <!-- v3ではdrawHexメソッドがない -->
+    <!-- <script src="http://geohex.net/hex_v2_gmap3.js" type="text/javascript" content="text/html; charset=utf-8"></script> -->
     <%= javascript_include_tag "application" %>
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
     <%= csrf_meta_tags %>
   </head>
   <body>
@@ -16,28 +18,42 @@
     </header>
     
     <nav id="nav">
-      <h2>Menu</h2>
+      <h2>メニュー</h2>
       <ul id="nav_menu">
-        <li><%= link_to 'login', login_url, :class => "mordal" %></li>
-        <li><%= link_to 'logout', logout_path, method: :delete, data: { confirm: 'Are you sure?' } %></li>
-        <li><%= link_to 'users', users_url, :class => "mordal" %></li>
+        <li><%= link_to('ログイン', login_url, :class => "modalLink") %></li>
+        <li><%= link_to('ログアウト', logout_path, method: :delete, data: { confirm: 'Are you sure?' }) %></li>
+        <li><%= link_to('ユーザの一覧', users_url, :class => "modalLink", :remote => true) %></li>
       </ul>
       
-      <h2>User status</h2>
+      <h2>ユーザステータス</h2>
       <div id="user">
         <% if session[:user_id] %>
-          <%= render @user_status %><!-- #_user.html.erbをロード。@userはgamepage_contrillerで作成 -->
+          <%= render @user_status %><!-- #_user.html.erbをロード。@user_statusはgamepage_contrillerで作成 -->
         <% else %>
-          please log in.
+          [please login!].
         <% end %>
       </div>
+      
+      <img src="" name="weather" width=50 height=50 border=0 />
+      
+      <form><input class="saikoro" type="button" value="さいころをふる"></form>
       
     </nav>
     
     <%= yield %>
     
     <footer>
+      <div id="geohex_license">
+        <p><a rel="license" href="http://creativecommons.org/licenses/by-sa/2.1/jp/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/2.1/jp/88x31.png" /></a><br />
+        <span xmlns:dc="http://purl.org/dc/elements/1.1/" property="dc:title">GeoHex by <a xmlns:cc="http://creativecommons.org/ns#" href="http://geogames.net" property="cc:attributionName" rel="cc:attributionURL">sa2da</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/2.1/jp/">Creative Commons &#34920;&#31034;-&#32153;&#25215; 2.1 &#26085;&#26412; License</a></p>
+      </div>
     </footer>
   
+    <div class="modal">
+      <div class="modalWindow">
+        <div class="hideModalButton">X</div>
+        <div class="modalWindow_contentts"></div>
+      </div>
+    </div>
   </body>
 </html>

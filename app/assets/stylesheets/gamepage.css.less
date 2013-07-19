@@ -14,7 +14,10 @@
 
 
 #gamepage {
-  .defpos;
+  position: relative;
+  float: right;
+  margin: 0;
+  padding: 0;
   //width: 9999px;
   //height: 1000px;
   border-left: 2px solid rgb(0,0,0);
@@ -23,5 +26,14 @@
   #map-canvas {
     .defpos;
     height: 100%;
+  }
+  
+  #streetview_canvas {
+    position: absolute;
+    right: 0;
+    bottom: 20px;
+    width: 300px;
+    height: 200px;
+    z-index: 9999;
   }
 }

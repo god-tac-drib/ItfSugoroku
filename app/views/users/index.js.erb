@@ -1,0 +1,8 @@
+function showModal() {
+  console.log("show modal");
+  $(".modal").css({"display":"block", "z-index":"9998"});
+  $(".modal").contents().css({"display":"block", "z-index":"9999"});
+}
+showModal();
+
+$(".modalWindow_contentts").html("<%=j render "modal_index" %>"); // 部分テンプレートを描画
