@@ -1,4 +1,10 @@
 ItfSugoroku::Application.routes.draw do
+  resources :characters
+
+
+  resources :collected_characters
+
+
   get "gamepage/index"
 
   get "admin" => "admin#index"
@@ -15,8 +21,18 @@ ItfSugoroku::Application.routes.draw do
   
   get "gamepage/index"
 
-  resources :users
+  resources :users do
+#     #get :call_action_from_js
+#     get "call_action_from_js" => :call_action_from_js
+  end
+  
+  controller :users do
+    get "users/:id/called_from_js" => :called_from_js
+  end
 
+  controller :application do
+    get "called_from_js" => :called_from_js
+  end
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

@@ -1,0 +1,15 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>User:</b>
+  <%= @collected_character.user_id %>
+</p>
+
+<p>
+  <b>Character:</b>
+  <%= @collected_character.character_id %>
+</p>
+
+
+<%= link_to 'Edit', edit_collected_character_path(@collected_character) %> |
+<%= link_to 'Back', collected_characters_path %>

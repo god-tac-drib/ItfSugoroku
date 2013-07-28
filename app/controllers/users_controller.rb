@@ -19,9 +19,11 @@ class UsersController < ApplicationController
   # GET /users/1.json
   def show
     @user = User.find(params[:id])
+    @user_status = current_user
 
     respond_to do |format|
       format.html # show.html.erb
+      format.js # モーダル用に追加
       format.json { render json: @user }
     end
   end
@@ -33,6 +35,7 @@ class UsersController < ApplicationController
 
     respond_to do |format|
       format.html # new.html.erb
+      format.js # モーダル用に追加
       format.json { render json: @user }
     end
   end
@@ -46,6 +49,7 @@ class UsersController < ApplicationController
   # POST /users.json
   def create
     @user = User.new(params[:user])
+    @user_status = current_user
 
     respond_to do |format|
       if @user.save
@@ -62,6 +66,7 @@ class UsersController < ApplicationController
   # PUT /users/1.json
   def update
     @user = User.find(params[:id])
+    @user_status = current_user
 
     respond_to do |format|
       if @user.update_attributes(params[:user])
@@ -82,7 +87,19 @@ class UsersController < ApplicationController
 
     respond_to do |format|
       format.html { redirect_to users_url }
+      format.js { redirect_to users_url, notice: "ユーザを削除しました" } # モーダル用に追加
       format.json { head :no_content }
     end
   end
+  
+  
+#   def called_from_js
+#     @params = params
+#     @user_status = current_user
+#     @respons = User.find(params[:id]).name
+#     
+#     respond_to do |format|
+#       format.js { render(:template => "ajax_respons/called_from_js") }
+#     end
+#   end
 end

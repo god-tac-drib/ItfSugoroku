@@ -1,0 +1,35 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Name:</b>
+  <%= @character.name %>
+</p>
+
+<p>
+  <b>Description:</b>
+  <%= @character.description %>
+</p>
+
+<p>
+  <b>Price:</b>
+  <%= @character.price %>
+</p>
+
+<p>
+  <b>Rare:</b>
+  <%= @character.rare %>
+</p>
+
+<p>
+  <b>Image url:</b>
+  <%= @character.image_url %>
+</p>
+
+<p>
+  <b>Zone code:</b>
+  <%= @character.zone_code %>
+</p>
+
+
+<%= link_to 'Edit', edit_character_path(@character) %> |
+<%= link_to 'Back', characters_path %>
