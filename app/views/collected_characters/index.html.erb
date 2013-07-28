@@ -1,0 +1,25 @@
+<h1>Listing collected_characters</h1>
+
+<table>
+  <tr>
+    <th>User</th>
+    <th>Character</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @collected_characters.each do |collected_character| %>
+  <tr>
+    <td><%= collected_character.user_id %></td>
+    <td><%= collected_character.character_id %></td>
+    <td><%= link_to 'Show', collected_character %></td>
+    <td><%= link_to 'Edit', edit_collected_character_path(collected_character) %></td>
+    <td><%= link_to 'Destroy', collected_character, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Collected character', new_collected_character_path %>

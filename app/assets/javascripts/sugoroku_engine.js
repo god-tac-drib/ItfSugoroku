@@ -3,7 +3,8 @@
 //////////////////
 
 // DOMが全てロードされてから実行
-document.addEventListener('DOMContentLoaded', function() {
+//document.addEventListener('DOMContentLoaded', function() { // jsでの書き方。jqueryでは下記で代用できる。prototypeの汚染回避が必要な場合は特に下記を使用する
+jQuery(document).ready(function($){
   var mapCanvas;
   var zoneList; // マップ
 	var yuruZone;	//ゆるキャラのでるマス
@@ -18,10 +19,12 @@ document.addEventListener('DOMContentLoaded', function() {
   var streetViewOptions;
   var playerZone; //プレイヤーの現在地
   var level = 9;
-  var flg = 0; //一度移動したら各パラメータを初期化するための判断材料
+  var flg = 0; // 現在が移動フェーズであるかの判断。連続移動などを防止。一度移動したら各パラメータを初期化するための判断材料
   var count;
-	var icon;	//天気のアイコンの種類
-	var play = 0;	//一度さいころを振ったら移動するまでサイコロを振れないようにするための変数
+	var icon;	// 天気のアイコンの種類
+	var play = 0;	// 一度さいころを振ったら移動するまでサイコロを振れないようにするための変数
+	
+	var ajaxReturnValue;
   
   // 初期化
   function initialize(){
@@ -46,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
     yuruZone = new Array("jkcEN","jkdsb","jkdsf","jkdoj","jkdmp","jkdar","jjdWt","jjdWp","jjdOz","jjdO3","jjdMx","jjdK5","jjdMz","jjdI5","jjdK3","jjdG1","jjdIx","jjd85","jjd81","jjdAx","jjdEr","jjdKp","jjdAt","jjd8x","jjd4t","jjd0x","jjd2x","jjd2z","jjd6z","jjdyz","jjd0r","jjd0n","jjdop","jjd2n","jjdsr","jjdqv","jjduz","jjdwv","jjdqz","jjdgr","jjder","jidWr","jjdev","jjdgv","jjda3","jidS5","jidsP");
     
     playerZone = GeoHex.getZoneByCode(zoneList[0]);
-  
+    
   	//マーカー(プレイヤーのコマ)の作成
     marker = createMarker({
   		position: new google.maps.LatLng(playerZone.lat,playerZone.lon),
@@ -86,18 +89,25 @@ document.addEventListener('DOMContentLoaded', function() {
   		var iconUrl = url + icon + png;
   		document.weather.src=iconUrl;
   	});
-  
+    
   	//ヘックスを描画。日本にマッピング
     for(var i=0 ; i < zoneList.length ; i++){
   		var zone = GeoHex.getZoneByCode(zoneList[i]);
   		zone.drawHex(mapCanvas, { linecolor: "#FF0000", fillcolor: "#FF8a00" ,popinfo:0});
     }
     
+    //こいつ走らせると何故かyuruzoneがundefinedで、geoHexのcore側でjs標準のメソッドがundefinedに対して呼べないよってエラー吐く
     // ゆるキャラゾーン色反転
-		 for(var i=0 ; i <= yuruZone.length ; i++){
-			 var zone = GeoHex.getZoneByCode(yuruZone[i]);
-			 zone.drawHex(mapCanvas, { linecolor: "#FF0000", fillcolor: "#00FF00" ,popinfo:0});
-		 }
+    for(var i=0 ; i < yuruZone.length ; i++){
+     var zone = GeoHex.getZoneByCode(yuruZone[i]);
+     zone.drawHex(mapCanvas, { linecolor: "#FF0000", fillcolor: "#00FF00" ,popinfo:0});
+    }
+    
+    // jsからのrails問い合わせ非同期通信のテスト
+    // 非同期通信に使用するパラメータを設定。通信完了時に実行される処理をコールバック関数として指定。
+    // 下記のajax関数の後の行にそのまま続けて処理を書いてしまうのはNG。何故なら、行っている処理は非同期通信なので、その結果が返ってくる前に次の行がインタプリットされてしまうという当たり前だが致命的なことが起こるため。だから後処理は、通信完了にトリガーされるコールバックの形で実装しそれを指定してやる必要がある。
+    var params = { accessType:"read", model:"User", id:1, attrToReadOrWrite:"id", callbackFunktion:"testCallback" };
+    readModelWithAjax(params); // 非同期通信を実行。この後の処理は実質コールバックとして呼び出される関数で実行される
   }
   
 
@@ -260,7 +270,7 @@ document.addEventListener('DOMContentLoaded', function() {
   		if(v==playerZone.code)mobileHex.splice(i,1); //プレイヤーは現在地から必ず移動しなければならない
   	});
   	
-  	for(var j = 0; j <= mobileHex.length ;j++){
+  	for(var j = 0; j < mobileHex.length ;j++){
   		var zone = GeoHex.getZoneByCode(mobileHex[j]);
   		var hexPolygon = zone.drawHex(mapCanvas, { linecolor: "#0000FF", fillcolor: "#0000FF" ,popinfo:0}); // ここでhexPolygonに正しくオブジェクトが入っておらず正常に動作していなかったため、hex_v2.03_core.jsのdrawHex関数でポリゴン情報を返す設定を追加。
   		// クリックした移動可能マスへ現在地を更新
@@ -356,16 +366,22 @@ document.addEventListener('DOMContentLoaded', function() {
   
   
   // コマの移動
-  function update(event){
-  	if(flg == 0){
+  function update(event) {
+    // 移動（可能）フェーズならば
+  	if(flg == 0) {
 			play = 0;
-  		var click_zone = GeoHex.getZoneByLocation(event.latLng.lat(),event.latLng.lng(),level);	//クリックした場所のhex取得
-  		if(mobileHex.indexOf(click_zone.code) != -1){	//クリックしたhexが移動可能範囲ならば
-  			flg++;
+      //クリックした場所のhex取得
+  		var click_zone = GeoHex.getZoneByLocation(event.latLng.lat(),event.latLng.lng(),level);
+  		//クリックしたhexが移動可能範囲ならば
+  		if(mobileHex.indexOf(click_zone.code) != -1){
+  			flg = 1;
   			playerZone = GeoHex.getZoneByCode(click_zone.code);
   			var new_latlng = new google.maps.LatLng(click_zone.lat, click_zone.lon);
-  			mapCanvas.panTo(new_latlng);	//地図の移動
-  			marker.setPosition(new_latlng);	//マーカーの移動
+  			//地図の移動
+  			mapCanvas.panTo(new_latlng);
+  			//マーカーの移動
+  			marker.setPosition(new_latlng);
+  	  	// ストリートビューを更新
   	  	var client = new google.maps.StreetViewService();
   	  	client.getPanoramaByLocation(new_latlng, 65000, function(result, status) {
     		  if(status == google.maps.StreetViewStatus.OK){
@@ -374,32 +390,103 @@ document.addEventListener('DOMContentLoaded', function() {
     			  streetViewPanorama.setPosition(nearestLatLng);
     		  }
   	  	});
+  	  	// 天気を更新
   			var url = "http://openweathermap.org/img/w/";
   			var png = ".png";
-  		  	getWeather(function (data) {
-  		  	    console.log('weather data received');
-  		  	    console.log(data.weather[0].description);
+		  	getWeather(function (data) {
+	  	    console.log('weather data received');
+	  	    console.log(data.weather[0].description);
   				var icon = data.weather[0].icon;
   				var iconUrl = url + icon + png;
   				document.weather.src=iconUrl;
-  		  	});
-    		  for(var j = 0; j <= mobileHex.length ;j++){
+		  	});
+		  	
+		  	
+		  	
+		  	// 移動可能として反転していたマスの色をもとにもどす
+  		  for(var j = 0; j < mobileHex.length ;j++){
     			var zone = GeoHex.getZoneByCode(mobileHex[j]);
     			zone.drawHex(mapCanvas, { linecolor: "#FF0000", fillcolor: "#FF8a00" ,popinfo:0});
-    		  }
+  		  }
+  		// 移動可能でないマスがクリックされた場合は、親関数であるmoveからやりなおし
   		}else{
   			flg = 0;
   			move(num);
   		}
+  		// 移動可能マスのリセット
   		mobileHex.length = 0;
-  	}else{
-  		  for(var j = 0; j <= mobileHex.length ;j++){
+    
+    // 移動（可能）フェーズでなければ
+  	} else {
+		  for(var j = 0; j < mobileHex.length ;j++) {
   			var zone = GeoHex.getZoneByCode(mobileHex[j]);
   			zone.drawHex(mapCanvas, { linecolor: "#FF0000", fillcolor: "#FF8a00" ,popinfo:0});
-  		  }
+		  }
   		mobileHex.length = 0;
   	}
   }
+  
+  
+  
+  function readModelWithAjax(params) {
+    var request = "called_from_js";
+    var attr = params.attrToReadOrWrite;
+    var returnValue;
+    $.ajax({
+      url: request,
+      type: "GET",
+      dataType: "script",
+      scriptCharset: "utf-8",
+      data: params,
+      // 返ってくるのはjsファイルの実行結果ではなく全体が文字列となったものなので、evalで式に変換してやってここで実行する。eval関数は文字列を引数にとりそれを式に変換する。
+      success: function(data) {
+        console.log("ajax from js was successed!");
+        var json = eval(data); // jsonが返ってくる
+        var jsObj = JSON.parse(json); // jsonをjsのオブジェクトとして
+        returnValue = jsObj[attr];
+        
+        eval(params.callbackFunktion + "(" + returnValue + ")");
+      },
+      error: function(response) {
+        console.log("ajax from js was faild");
+      }
+    });
+    //console.log(returnValue.ret);
+    //return returnValue.toString();
+  }
+  
+  function testCallback(value) {
+    console.log(value);
+  }
+  
+/*
+  function writeModelWithAjax(params) {
+    //var request = "users/1/called_from_js";
+    var request = "called_from_js";  
+    $.ajax({
+        url: request,
+        type: "GET",
+        data: {//year : $(":selected").attr("value"),
+                model: "User",
+                id: 1,
+        //        mode: 'hoge',
+        //        type: 'entry'
+              },
+        //dataType: "html",
+        // 返ってくるのはjsファイルの実行結果ではなく全体が文字列となったものなので、evalで式に変換してやってここで実行する。eval関数は文字列を引数にとりそれを式に変換する。
+        success: function(response) {
+            //alert("success");
+            
+            console.log(eval(response));
+        },
+        error: function(response) {
+            //alert("errror");
+            console.log("faild");
+        }
+    });
+  }
+*/
+  
   
   // ロード時に初期化を実行
   google.maps.event.addDomListener(window,"load",initialize);

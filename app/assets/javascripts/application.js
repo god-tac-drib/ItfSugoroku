@@ -16,51 +16,54 @@
 //= require_tree .
 
 
+jQuery(document).ready(function($){ // prototype.js汚染回避。これに加え読み込み順はprototypeが先でjQueryが後の必要があるので、prototypeはpolution_escapeディレクトリを作成し隔離、require_tree . で読み込まれないようにして、html側でjavascript_link_tagでapplication.jsの前に呼び出す。今回はjesterでprototypeが必要なので。←結局使用しなかった
 /////////////
 // 基本設定 //
 /////////////
 
-// リロード、ウィンドウサイズ変更時のコールバック
-jQuery.event.add(window, "load", resizeOrReload);
-jQuery.event.add(window, "resize", resizeOrReload);
-
-var window_height = 0;
-var window_width = 0;
-var contact_padding_height = 0;
-
-// リロード、ウィンドウサイズ変更時のコールバックの実装
-function resizeOrReload() {
-  window_width = $(window).width();
-  window_height = $(window).height();
+  // リロード、ウィンドウサイズ変更時のコールバック
+  jQuery.event.add(window, "load", resizeOrReload);
+  jQuery.event.add(window, "resize", resizeOrReload);
   
-  $("nav").css("height", window_height - 140);
-  $("#gamepage").css({"width":window_width - 202, "height":window_height - 40});
-  $("#map_canvas").css({"width":window_width - 202, "height":window_height - 40}); // htmlタグにwidth, heightが明記されていないと、googleMapが表示されないため
+  var window_height = 0;
+  var window_width = 0;
+  var contact_padding_height = 0;
   
-  $(".modal").css({"width":window_width, "height":window_height});
-  $(".modalWindow").css({"top":window_height / 2 - 200, "left":window_width / 2 - 300});
-}
-
-
-// railsであってもこの書き出しは必須。
-$(document).ready(function(){
-
-  function hideModal() {
-    console.log("close modal");
-    $(".modal").css({"display":"none", "z-index":"-9999"});
-    $(".modal").contents().css({"display":"none", "z-index":"-9999"});
-    $(".modalWindow_contentts").contents().remove(); // モーダルを閉じたら描画内容を削除
-  }
-  function showModal() {
-    console.log("show modal");
-    $(".modal").css({"display":"block", "z-index":"9998"});
-    $(".modal").contents().css({"display":"block", "z-index":"9999"});
+  // リロード、ウィンドウサイズ変更時のコールバックの実装
+  function resizeOrReload() {
+    window_width = $(window).width();
+    window_height = $(window).height();
+    
+    $("nav").css("height", window_height - 140);
+    $("#gamepage").css({"width":window_width - 202, "height":window_height - 40});
+    $("#map_canvas").css({"width":window_width - 202, "height":window_height - 40}); // htmlタグにwidth, heightが明記されていないと、googleMapが表示されないため
+    
+    $(".modal").css({"width":window_width, "height":window_height});
+    $(".modalWindow").css({"top":window_height / 2 - 200, "left":window_width / 2 - 300});
   }
   
-  jQuery.event.add(window, "load", hideModal);
   
-  $(".hideModalButton").click(function() {
-    hideModal();
+  // railsであってもこの書き出しは必須。
+  $(document).ready(function(){
+  
+    function hideModal() {
+      console.log("close modal");
+      $(".modal").css({"display":"none", "z-index":"-9999"});
+      $(".modal").contents().css({"display":"none", "z-index":"-9999"});
+      $(".modalWindow_contentts").contents().remove(); // モーダルを閉じたら描画内容を削除
+    }
+    function showModal() {
+      console.log("show modal");
+      $(".modal").css({"display":"block", "z-index":"9998"});
+      $(".modal").contents().css({"display":"block", "z-index":"9999"});
+    }
+    
+    jQuery.event.add(window, "load", hideModal);
+    
+    $(".hideModalButton").click(function() {
+      hideModal();
+    });
+  
   });
-
+  
 });

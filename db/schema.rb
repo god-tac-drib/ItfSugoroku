@@ -11,7 +11,25 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130613114528) do
+ActiveRecord::Schema.define(:version => 20130727163334) do
+
+  create_table "characters", :force => true do |t|
+    t.string   "name"
+    t.text     "description"
+    t.integer  "price"
+    t.integer  "rare"
+    t.string   "image_url"
+    t.string   "zone_code"
+    t.datetime "created_at",  :null => false
+    t.datetime "updated_at",  :null => false
+  end
+
+  create_table "collected_characters", :force => true do |t|
+    t.integer  "user_id"
+    t.integer  "character_id"
+    t.datetime "created_at",   :null => false
+    t.datetime "updated_at",   :null => false
+  end
 
   create_table "users", :force => true do |t|
     t.string   "name"

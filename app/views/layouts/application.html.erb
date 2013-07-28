@@ -2,7 +2,7 @@
 <html>
   <head>
     <title>ItfSugoroku</title>
-    <%= stylesheet_link_tag    "application", :media => "all" %>
+    <%= stylesheet_link_tag "application", :media => "all" %>
     <script src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
     <!-- <script src="http://geohex.net/hex_v2.03_core.js" type="text/javascript" content="text/html; charset=utf-8"></script> --> <!-- v3ではdrawHexメソッドがない -->
     <!-- <script src="http://geohex.net/hex_v2_gmap3.js" type="text/javascript" content="text/html; charset=utf-8"></script> -->
@@ -20,7 +20,7 @@
     <nav id="nav">
       <h2>メニュー</h2>
       <ul id="nav_menu">
-        <li><%= link_to('ログイン', login_url, :class => "modalLink") %></li>
+        <li><%= link_to('ログイン', login_url, :class => "modalLink", :remote => true) %></li>
         <li><%= link_to('ログアウト', logout_path, method: :delete, data: { confirm: 'Are you sure?' }) %></li>
         <li><%= link_to('ユーザの一覧', users_url, :class => "modalLink", :remote => true) %></li>
       </ul>
@@ -28,7 +28,8 @@
       <h2>ユーザステータス</h2>
       <div id="user">
         <% if session[:user_id] %>
-          <%= render @user_status %><!-- #_user.html.erbをロード。@user_statusはgamepage_contrillerで作成 -->
+           <!-- #_user.html.erbをロード。@user_statusはgamepage_contrillerで作成 -->
+          <%= render @user_status %>
         <% else %>
           [please login!].
         <% end %>
@@ -52,7 +53,7 @@
     <div class="modal">
       <div class="modalWindow">
         <div class="hideModalButton">X</div>
-        <div class="modalWindow_contentts"></div>
+        <div class="modalWindow_contents"></div>
       </div>
     </div>
   </body>
